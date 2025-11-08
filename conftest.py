@@ -4,14 +4,8 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from faker import Faker
+from urls import Urls  # Импортируем класс Urls из вашего существующего файла
 
-@pytest.fixture
-def urls():
-    class Urls:
-        STELLAR_BURGER_CONSTUCT = "https://stellarburgers.education-services.ru/"
-        STELLAR_BURGER_LENTA = "https://stellarburgers.education-services.ru/feed"
-        STELLAR_BURGER_PROFILE = "https://stellarburgers.education-services.ru/account/profile"
-    return Urls
 
 class WebdriverFactory:
     @staticmethod
@@ -24,10 +18,12 @@ class WebdriverFactory:
         else:
             raise ValueError(f"Unsupported browser: {browser_name}")
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--browser", action="store", default="chrome", help="Выбор браузера: 'chrome' или 'firefox'."
     )
+
 
 @pytest.fixture
 def driver(request):
@@ -36,6 +32,12 @@ def driver(request):
     driver.maximize_window()
     yield driver
     driver.quit()
+
+
+@pytest.fixture
+def urls():
+    return Urls()
+
 
 @pytest.fixture
 def login_user(urls):
@@ -47,9 +49,9 @@ def login_user(urls):
         "name": fake.name()
     }
 
-    requests.post(f'{urls.STELLAR_BURGER_CONSTUCT}/api/auth/register', data=payload)
+    requests.post(f'{urls.STELLAR_BURGER_CONSTRUCT}/api/auth/register', data=payload)
     
-    login_response = requests.post(f"{urls.STELLAR_BURGER_CONSTUCT}/api/auth/login", data={
+    login_response = requests.post(f"{urls.STELLAR_BURGER_CONSTRUCT}/api/auth/login", data={
         "email": payload["email"],
         "password": payload["password"]
     })
@@ -66,4 +68,4 @@ def login_user(urls):
     yield user_data
     
     headers = {"Authorization": f"Bearer {access_token}"}
-    requests.delete(f"{urls.STELLAR_BURGER_CONSTUCT}/api/auth/user", headers=headers)
+    requests.delete(f"{urls.STELLAR_BURGER_CONSTRUCT}/api/auth/user", headers=headers)
